@@ -70,8 +70,8 @@ NetFavorite/
 
 1. **克隆项目**
 ```bash
-git clone <repository-url>
-cd webb
+git clone https://github.com/XUXUAN-BOOP/web-.git
+cd web-
 ```
 
 2. **配置数据库连接**
