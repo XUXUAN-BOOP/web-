@@ -344,7 +344,7 @@ MIT License
 
 ## 作者
 
-AI-Assisted Development with Trae IDE
+1aush
 
 ---
 
