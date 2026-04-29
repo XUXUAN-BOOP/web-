@@ -70,7 +70,7 @@ NetFavorite/
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/XUXUAN-BOOP/web-.git
+git clone https://github.com/1aush/web-.git
 cd web-
 ```
 
