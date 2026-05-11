@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark 获取单个</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="div"></div>
+    <script>
+        // 端口5248 + 你的真实ID
+        fetch('http://localhost:5248/api/Bookmark/29d998cd-df66-4b88-8399-26797ecab332', {
+            method: 'GET'
+        })
+            .then((res) => {
+                if (res.status == 200) {
+                    return res.json()
+                }
+                else {
+                    document.getElementById('div').innerHTML = `
+                    <div class="alert alert-danger m-2">
+                        查询失败
+                    </div>`
+                }
+            })
+            .then((res) => {
+                let htm = `
+                <div class="alert alert-success m-2">
+                    <p>Bookmark_Id:${res.Bookmark_Id}</p>
+                    <p>Bookmark_Address:${res.Bookmark_Address}</p>
+                    <p>Bookmark_Title:${res.Bookmark_Title}</p>
+                    <p>Bookmark_CreateTime:${res.Bookmark_CreateTime}</p>
+                </div>`
+                document.getElementById('div').innerHTML = htm
+            })
+    </script>
+</body>
+
+</html>

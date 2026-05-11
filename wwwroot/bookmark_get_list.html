@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark 获取列表</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="div"></div>
+    <script>
+        // 替换为你的端口 5248
+        fetch('http://localhost:5248/api/Bookmark', {
+            method: 'GET'
+        })
+            .then((res) => {
+                return res.json()
+            })
+            .then((res) => {
+                let htm = ''
+                for (let bookmark of res) {
+                    htm += `
+                    <div class="alert alert-success m-2">
+                        <p>Bookmark_Id:${bookmark.Bookmark_Id}</p>
+                        <p>Bookmark_Address:${bookmark.Bookmark_Address}</p>
+                        <p>Bookmark_Title:${bookmark.Bookmark_Title}</p>
+                        <p>Bookmark_CreateTime:${bookmark.Bookmark_CreateTime}</p>
+                    </div>`
+                }
+                document.getElementById('div').innerHTML = htm
+            })
+    </script>
+</body>
+
+</html>

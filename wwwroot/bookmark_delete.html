@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark 删除</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="div"></div>
+    <script>
+        // 端口为项目实际端口5248，ID为数据库中真实存在的书签ID
+        let request = new Request('http://localhost:5248/api/Bookmark/50274d14-471a-481d-99fe-6f4f715146c3', {
+            method: 'delete'
+        })
+        fetch(request).then(response => {
+            // DELETE接口成功标准状态码为204 NoContent，修正原200的错误判断
+            if (response.status == 204) {
+                document.getElementById('div').innerHTML = `
+                <div class="alert alert-success m-2">
+                    删除成功
+                </div>`
+            }
+            else {
+                document.getElementById('div').innerHTML = `
+                <div class="alert alert-danger m-2">
+                    删除失败
+                </div>`
+            }
+        })
+    </script>
+</body>
+</html>

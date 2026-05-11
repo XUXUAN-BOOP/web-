@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark 更新</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="div"></div>
+    <script>
+        // 替换为数据库中真实存在的书签ID（与URL中ID完全一致）
+        let bookmark = {
+            Bookmark_Id: "50274d14-471a-481d-99fe-6f4f715146c3",
+            Bookmark_Address: "https://www.baidu.com",
+            Bookmark_Title: "百度",
+            Bookmark_CreateTime: "2026-03-31T13:49:29"
+        }
+        // 端口为项目实际端口5248，ID与bookmark对象ID一致
+        let request = new Request('http://localhost:5248/api/Bookmark/50274d14-471a-481d-99fe-6f4f715146c3', {
+            method: 'put',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(bookmark)
+        })
+        fetch(request).then(response => {
+            if (response.status == 200) {
+                document.getElementById('div').innerHTML = `
+                    <div class="alert alert-success m-2">
+                        更新成功
+                    </div>`
+            }
+            else {
+                document.getElementById('div').innerHTML = `
+                    <div class="alert alert-danger m-2">
+                        更新失败
+                    </div>`
+            }
+        })
+    </script>
+</body>
+</html>
