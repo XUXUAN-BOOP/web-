@@ -10,73 +10,85 @@ namespace NetFavorite.Controllers
     [Authorize]
     public class BookmarkController : ControllerBase
     {
-        private readonly NetFavoriteDbContext _context;
+        private readonly NetFavoriteDbContext _db;
+        private readonly Utilities.ITokenService _tokenService;
+        private readonly Models.LoginUser loginUser;
 
-        public BookmarkController(NetFavoriteDbContext context)
+        public BookmarkController(NetFavoriteDbContext db, Utilities.ITokenService tokenService)
         {
-            _context = context;
+            _db = db;
+            _tokenService = tokenService;
+            loginUser = _tokenService.ReadToken();
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bookmark>>> Get()
+        public IEnumerable<Models.Bookmark> Get()
         {
-            return Ok(await _context.Bookmark.ToListAsync());
+            return _db.Bookmark
+                .Where(it => it.Bookmark_LoginUserId == loginUser.LoginUser_Id)
+                .ToList();
         }
 
-        // 保留你原有的其他接口（GET(id)/POST/PUT/DELETE），无需修改
+        // GET api/<BookmarkController>/5
+        // 按照主键，查询单个实例并返回
         [HttpGet("{id}")]
-        public async Task<ActionResult<Bookmark>> Get(Guid id)
+        public IActionResult Get(Guid id)
         {
-            var bookmark = await _context.Bookmark.FindAsync(id);
-            return bookmark == null ? NotFound() : Ok(bookmark);
+            var bookmark = _db.Bookmark.FirstOrDefault(it => it.Bookmark_Id == id);
+            if (bookmark == null) return NotFound();
+
+            if (bookmark.Bookmark_LoginUserId != loginUser.LoginUser_Id) return Forbid();
+            return Ok(bookmark);
         }
 
+        // POST api/<BookmarkController>
+        // 创建
         [HttpPost]
-        public async Task<ActionResult<Bookmark>> Post([FromBody] Bookmark bookmark)
+        public IActionResult Post([FromBody] Models.Bookmark bookmark)
         {
-            bookmark.Bookmark_Id = Guid.NewGuid();
-            bookmark.Bookmark_CreateTime = DateTime.UtcNow;
-            _context.Bookmark.Add(bookmark);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = bookmark.Bookmark_Id }, bookmark);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, [FromBody] Bookmark value)
-        {
-            if (id != value.Bookmark_Id)
+            if (string.IsNullOrEmpty(bookmark.Bookmark_Address))
             {
                 return BadRequest();
             }
 
-            var bookmark = await _context.Bookmark.FindAsync(id);
-            if (bookmark == null)
-            {
-                return NotFound();
-            }
+            bookmark.Bookmark_Id = Guid.NewGuid();
+            bookmark.Bookmark_CreateTime = DateTime.Now;
+            bookmark.Bookmark_LoginUserId = loginUser.LoginUser_Id;
 
-            bookmark.Bookmark_Title = value.Bookmark_Title;
-            bookmark.Bookmark_Address = value.Bookmark_Address;
-
-            _context.Bookmark.Update(bookmark);
-            await _context.SaveChangesAsync();
-
+            _db.Bookmark.Add(bookmark);
+            _db.SaveChanges();
             return Ok(bookmark);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        // PUT api/<BookmarkController>/5
+        [HttpPut("{id}")]
+        public IActionResult Put(Guid id, [FromBody] Models.Bookmark value)
         {
-            var bookmark = await _context.Bookmark.FindAsync(id);
-            if (bookmark == null)
-            {
-                return NotFound();
-            }
+            var bookmark = _db.Bookmark.FirstOrDefault(it => it.Bookmark_Id == id);
+            if (bookmark == null) return NotFound();
 
-            _context.Bookmark.Remove(bookmark);
-            await _context.SaveChangesAsync();
+            if (bookmark.Bookmark_LoginUserId != loginUser.LoginUser_Id) return Forbid();
 
-            return NoContent();
+            bookmark.Bookmark_Title = value.Bookmark_Title;
+            bookmark.Bookmark_Address = value.Bookmark_Address;
+            _db.Bookmark.Update(bookmark);
+            _db.SaveChanges();
+            return Ok();
+        }
+
+        // DELETE api/<BookmarkController>/5
+        //删除
+        [HttpDelete("{id}")]
+        public IActionResult Delete(Guid id)
+        {
+            var bookmark = _db.Bookmark.FirstOrDefault(it => it.Bookmark_Id == id);
+            if (bookmark == null) return NotFound();
+
+            if (bookmark.Bookmark_LoginUserId != loginUser.LoginUser_Id) return Forbid();
+
+            _db.Bookmark.Remove(bookmark);
+            _db.SaveChanges();
+            return Ok();
         }
     }
 }

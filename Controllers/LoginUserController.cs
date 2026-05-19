@@ -21,7 +21,7 @@ namespace NetFavorite.Controllers
 
         // 查询所有用户
         [HttpGet]
-        [Authorize(Roles = "系统管理员")]
+        [PermissionAuthorize("查询用户")]
         public async Task<IActionResult> Get()
         {
             return Ok(
@@ -37,7 +37,7 @@ namespace NetFavorite.Controllers
 
         // 根据ID查询单个用户
         [HttpGet("{id}")]
-        [Authorize(Roles = "系统管理员")]
+        [PermissionAuthorize("查询用户")]
         public async Task<IActionResult> Get(Guid id)
         {
             var loginUser = await _context.LoginUser.FirstOrDefaultAsync(it => it.LoginUser_Id == id);
@@ -60,6 +60,7 @@ namespace NetFavorite.Controllers
 
         // PUT api/<LoginUserController>/5
         [HttpPut("{id}")]
+        [PermissionAuthorize("修改用户")]
         public async Task<IActionResult> Put(Guid id, [FromBody] Models.LoginUser value)
         {
             var user = await _context.LoginUser.FirstOrDefaultAsync(it => it.LoginUser_Id == id);
@@ -88,6 +89,7 @@ namespace NetFavorite.Controllers
 
         // POST api/<LoginUserController>
         [HttpPost]
+        [PermissionAuthorize("新增用户")]
         public async Task<IActionResult> Post([FromBody] Models.LoginUser value)
         {
             if (string.IsNullOrEmpty(value.LoginUser_Account))
@@ -125,6 +127,7 @@ namespace NetFavorite.Controllers
 
         // 删除用户
         [HttpDelete("{id}")]
+        [PermissionAuthorize("删除用户")]
         public async Task<IActionResult> DeleteLoginUser(Guid id)
         {
             var loginUser = await _context.LoginUser.FindAsync(id);

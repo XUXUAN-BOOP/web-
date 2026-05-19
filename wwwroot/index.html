@@ -447,7 +447,7 @@
 
         <!-- Swagger 文档标签页 -->
         <div id="swagger-tab" class="tab-content active">
-            <iframe src="/swagger/index.html" class="swagger-frame" frameborder="0"></iframe>
+            <iframe id="swaggerFrame" class="swagger-frame" frameborder="0"></iframe>
         </div>
 
         <!-- 测试工具标签页 -->
@@ -646,6 +646,14 @@
         document.getElementById('launchModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideLaunchModal();
+            }
+        });
+
+        // 防止 Swagger iframe 被缓存
+        document.addEventListener('DOMContentLoaded', function() {
+            const frame = document.getElementById('swaggerFrame');
+            if (frame) {
+                frame.src = '/swagger/index.html?t=' + Date.now();
             }
         });
     </script>

@@ -36,7 +36,8 @@ namespace NetFavorite.Utilities
             {
                 new Claim("UserID", userId.ToString()),
                 new Claim("UserName", userName),
-                new Claim("UserRole", userRole)
+                new Claim("UserRole", userRole),
+                new Claim(ClaimTypes.Role, userRole)
             };
 
             // 2. 获取密钥

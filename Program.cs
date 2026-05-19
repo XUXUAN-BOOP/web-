@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -12,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
 // 2. Swagger + JWT授权配置（完全适配你的包版本，零报错，符合课程要求）
@@ -92,10 +93,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// 7. 添加用于访问Header数据的依赖项 HttpContextAccessor
+// 6. 扩展授权策略
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("系统管理员", "普通管理员"));
+    options.AddPolicy("AdminOnly2", policy => policy.RequireClaim("UserRole", "系统管理员", "普通管理员"));
+});
+
+// 7. 自定义授权策略提供程序
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddTransient<IAuthorizationHandler, PermissionRequirementHandler>();
+
+// 8. 添加用于访问Header数据的依赖项 HttpContextAccessor
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-// 8. 添加 TokenService 依赖项
+// 9. 添加 TokenService 依赖项
 builder.Services.AddTransient<ITokenService, TokenService>();
 
 // 构建应用
@@ -114,9 +126,9 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "书签管理器 API v1");
         c.RoutePrefix = "swagger";
         
-        // 经典Swagger样式配置
-        c.InjectStylesheet("/swagger-ui/custom-swagger.css");
-        c.InjectJavascript("/swagger-ui/custom-swagger.js");
+        // 经典Swagger样式配置（v=时间戳 防止浏览器缓存）
+        c.InjectStylesheet("/swagger-ui/custom-swagger.css?v=" + DateTime.UtcNow.Ticks);
+        c.InjectJavascript("/swagger-ui/custom-swagger.js?v=" + DateTime.UtcNow.Ticks);
     });
 }
 

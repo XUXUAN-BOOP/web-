@@ -21,13 +21,9 @@
 - 用户删除
 
 ### 书签管理
-- 书签 CRUD 操作
-- 按分类筛选书签
-- 书签搜索
-
-### 分类管理
-- 分类 CRUD 操作
-- 分类下书签统计
+- 书签 CRUD 操作（需认证）
+- 用户只能操作自己的书签（通过 Bookmark_LoginUserId 关联）
+- 自动记录创建时间
 
 ### 安全特性
 - 密码加盐哈希加密（PBKDF2 + HMACSHA512，20次迭代）
@@ -42,11 +38,11 @@ NetFavorite/
 │   ├── LoginController.cs        # 登录、修改密码、测试接口
 │   ├── LoginUserController.cs    # 用户管理
 │   ├── BookmarkController.cs     # 书签管理
-│   └── CategoryController.cs     # 分类管理
+│   └── TestPasswordController.cs # 密码测试接口
 ├── Models/               # 数据模型
 │   ├── LoginUser.cs                # 用户模型
 │   ├── Bookmark.cs                 # 书签模型
-│   └── Category.cs                 # 分类模型
+│   └── LoginRequest.cs             # 登录请求模型
 ├── Utilities/           # 工具类
 │   ├── HashPasswordService.cs     # 密码加密服务
 │   └── TokenService.cs            # JWT Token 服务
@@ -186,6 +182,50 @@ dotnet run
 
 **说明**: 密码会重新生成 Salt 并加密。
 
+### 书签管理（需认证）
+
+所有书签接口都需要在请求头中携带 `Authorization: Bearer <token>`
+
+#### GET /api/Bookmark - 获取当前用户的书签列表
+**响应示例**:
+```json
+[
+  {
+    "bookmark_Id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "bookmark_Address": "https://example.com",
+    "bookmark_Title": "示例书签",
+    "bookmark_CreateTime": "2026-01-01T00:00:00",
+    "bookmark_LoginUserId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  }
+]
+```
+
+#### GET /api/Bookmark/{id} - 获取单个书签
+**说明**: 只能获取自己创建的书签，否则返回 403
+
+#### POST /api/Bookmark - 创建书签
+**请求体**:
+```json
+{
+  "bookmark_Address": "https://new-site.com",
+  "bookmark_Title": "新书签"
+}
+```
+**说明**: bookmark_Id 和 bookmark_LoginUserId 自动生成
+
+#### PUT /api/Bookmark/{id} - 修改书签
+**请求体**:
+```json
+{
+  "bookmark_Address": "https://updated-site.com",
+  "bookmark_Title": "更新后的标题"
+}
+```
+**说明**: 只能修改自己创建的书签
+
+#### DELETE /api/Bookmark/{id} - 删除书签
+**说明**: 只能删除自己创建的书签
+
 ### 测试接口（开发环境）
 
 #### GET /api/Login/test/salt - 生成随机盐值
@@ -280,17 +320,10 @@ dotnet ef database update
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | Bookmark_Id | uniqueidentifier | 主键 |
-| Bookmark_Title | nvarchar(200) | 标题 |
-| Bookmark_Url | nvarchar(1000) | URL |
-| Category_Id | uniqueidentifier | 外键（分类ID） |
-| User_Id | uniqueidentifier | 外键（用户ID） |
-
-#### Category 表
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| Category_Id | uniqueidentifier | 主键 |
-| Category_Name | varchar(50) | 分类名称 |
-| User_Id | uniqueidentifier | 外键（用户ID） |
+| Bookmark_Address | varchar(500) | 书签地址 |
+| Bookmark_Title | varchar(500) | 书签标题 |
+| Bookmark_CreateTime | datetime | 创建时间 |
+| Bookmark_LoginUserId | uniqueidentifier | 外键（用户ID） |
 
 ## 配置说明
 
@@ -348,4 +381,4 @@ MIT License
 
 ---
 
-**最后更新**: 2026-04-28
+**最后更新**: 2026-05-12

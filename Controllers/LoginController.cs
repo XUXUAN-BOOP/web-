@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NetFavorite.Models;
 using NetFavorite.Utilities;
 
@@ -22,9 +23,9 @@ namespace NetFavorite.Controllers
         /// 用户登录 - POST 方式，密码通过请求正文传递，使用 HashPasswordService 验证
         /// </summary>
         [HttpPost]
-        public ActionResult<Models.DataModelLogin> Post([FromBody] LoginRequest request)
+        public async Task<ActionResult<Models.DataModelLogin>> Post([FromBody] LoginRequest request)
         {
-            var user = _db.LoginUser.FirstOrDefault(it => it.LoginUser_Account == request.Account);
+            var user = await _db.LoginUser.FirstOrDefaultAsync(it => it.LoginUser_Account == request.Account);
             if (user == null) return Unauthorized("用户名或密码错误");
 
             if (Utilities.HashPasswordService.Validate(request.Password, user.LoginUser_Salt!, user.LoginUser_Password))

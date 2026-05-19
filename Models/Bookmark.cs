@@ -12,4 +12,6 @@ public partial class Bookmark
     public string? Bookmark_Title { get; set; }
 
     public DateTime Bookmark_CreateTime { get; set; }
+
+    public Guid? Bookmark_LoginUserId { get; set; }
 }
